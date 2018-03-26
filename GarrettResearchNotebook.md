@@ -1,7 +1,7 @@
-# Dissertation Online Research Notebook
+# Online Dissertation Research Notebook
 
-### Author: April Dawn Garrett
-### Affiliation: University of Vermont, Biology Department, Pespeni Lab 
+## Author: April Dawn Garrett
+#### Affiliation: University of Vermont, Biology Department, Pespeni Lab 
 
 ## Projects title/descriptions
 
