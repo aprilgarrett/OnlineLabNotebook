@@ -13,7 +13,7 @@
 * [Page 1:   Start: 2018-04-04](#id-section1). Urchin Capseq MS BWA Mem ReMapping Notes
 * [Page 2:  ](#id-section2). Carbonic Anhydrase: Getting Allele Freqs From Files Melissa Mapped
 * [Page 3:   Start: 2018-04-17](#id-section3). Processing OASV2 RNA Samples
-* [Page 4:  ](#id-section4).
+* [Page 4:   Start: 2018-05-02](#id-section4). Working with vcf files (NoDups & with dups) to get AFs & compare to OASV2 DNA (in progress)
 * [Page 5:  ](#id-section5).
 * [Page 6:  ](#id-section6).
 * [Page 7:  ](#id-section7).
@@ -739,3 +739,10 @@ SCREEN ID: 7282.pts-0.pespenilab
 /data/programs/bcftools/bin/bcftools call -mv  > RNA_OASV2_urchinlarvae2018.vcf 
 
 SCREEN ID: 7300.pts-0.pespenilab
+
+
+------
+
+<div id='id-section4'/> 
+
+### Page 4:  Working with vcf files (NoDups & with dups) to get AFs & compare to OASV2 DNA (in progress)
