@@ -10,7 +10,7 @@
 
 
 # Table of contents (for 200 entries)    
-* [Page 1:   2018-03-26](#id-section1) Urchin Capseq MS BWA Mem ReMapping Notes
+* [Page 1:   2018-04-04](#id-section1) Urchin Capseq MS BWA Mem ReMapping Notes
 * [Page 2:  ](#id-section2) Carbonic Anhydrase: Getting Allele Freqs From Files Melissa Mapped
 * [Page 3:  ](#id-section3).
 * [Page 4:  ](#id-section4).
@@ -210,3 +210,176 @@
 * [Page 198:  ](#id-section198).
 * [Page 199:  ](#id-section199).
 * [Page 200:  ](#id-section200).
+
+
+------
+
+<div id='id-section1'/>    
+    
+### Page 1:  Urchin Capseq MS BWA Mem ReMapping Notes     
+
+
+### April 4, 2018: Carbonic Anhydrase work. Adding read groups to bam files via picard tools and remaking vcf file for Melissa
+
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=CC_SH_H_D1_0385.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/CC_SH_H_D1_0385.fastq.WithRG.bam \
+      RGID=CC_SH_H_D1_0385 \
+      RGLB=CC_SH_H_D1_0385 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=CC_SH_H_D1_0385
+      
+# Check to see that it read group was added     
+/data/programs/samtools view -H CC_SH_H_D1_0385.fastq.WithRG.bam | grep "^@RG" > RG_CC_SH_H_D1_0385.txt
+
+# Now do for all files (BELOW)
+
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=CC_SH_H_D7_1000.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/CC_SH_H_D7_1000.fastq.WithRG.bam \
+      RGID=CC_SH_H_D7_1000 \
+      RGLB=CC_SH_H_D7_1000 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=CC_SH_H_D7_1000
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=CC_TP_L_D1_0385.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/CC_TP_L_D1_0385.fastq.WithRG.bam \
+      RGID=CC_TP_L_D1_0385 \
+      RGLB=CC_TP_L_D1_0385 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=CC_TP_L_D1_0385
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=CC_TP_L_D7_1000.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/CC_TP_L_D7_1000.fastq.WithRG.bam \
+      RGID=CC_TP_L_D7_1000 \
+      RGLB=CC_TP_L_D7_1000 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=CC_TP_L_D7_1000
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=NC_BD_L_D1_0385.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/NC_BD_L_D1_0385.fastq.WithRG.bam \
+      RGID=NC_BD_L_D1_0385 \
+      RGLB=NC_BD_L_D1_0385 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=NC_BD_L_D1_0385
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=NC_BD_L_D7_1000.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/NC_BD_L_D7_1000.fastq.WithRG.bam \
+      RGID=NC_BD_L_D7_1000 \
+      RGLB=NC_BD_L_D7_1000 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=NC_BD_L_D7_1000
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=NC_VD_H_D1_0385.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/NC_VD_H_D1_0385.fastq.WithRG.bam \
+      RGID=NC_VD_H_D1_0385 \
+      RGLB=NC_VD_H_D1_0385 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=NC_VD_H_D1_0385
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=NC_VD_H_D7_1000.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/NC_VD_H_D7_1000.fastq.WithRG.bam \
+      RGID=NC_VD_H_D7_1000 \
+      RGLB=NC_VD_H_D7_1000 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=NC_VD_H_D7_1000
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=OR_FC_L_D1_0385.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/OR_FC_L_D1_0385.fastq.WithRG.bam \
+      RGID=OR_FC_L_D1_0385 \
+      RGLB=OR_FC_L_D1_0385 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=OR_FC_L_D1_0385
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=OR_FC_L_D7_1000.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/OR_FC_L_D7_1000.fastq.WithRG.bam \
+      RGID=OR_FC_L_D7_1000 \
+      RGLB=OR_FC_L_D7_1000 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=OR_FC_L_D7_1000
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=OR_ST_H_D1_0385.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/OR_ST_H_D1_0385.fastq.WithRG.bam \
+      RGID=OR_ST_H_D1_0385 \
+      RGLB=OR_ST_H_D1_0385 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=OR_ST_H_D1_0385
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=OR_ST_H_D7_1002.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/OR_ST_H_D7_1002.fastq.WithRG.bam \
+      RGID=OR_ST_H_D7_1002 \
+      RGLB=OR_ST_H_D7_1002 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=OR_ST_H_D7_1002
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=SB_AL_L_D1_0385.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/SB_AL_L_D1_0385.fastq.WithRG.bam \
+      RGID=SB_AL_L_D1_0385 \
+      RGLB=SB_AL_L_D1_0385 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=SB_AL_L_D1_0385
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=SB_AL_L_D7_1000.fastq.gz.bam \
+      O=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/SB_AL_L_D7_1000.fastq.WithRG.bam \
+      RGID=SB_AL_L_D7_1000 \
+      RGLB=SB_AL_L_D7_1000 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=SB_AL_L_D7_1000
+      
+#######################################################################################################################
+      
+### MAKING VCF File
+
+
+
+# Merge all the bam files into one
+/data/programs/samtools merge merged.bam *.bam
+
+## Making bash script for sorting and indexing merged bam file and making vcf file
+
+#!/bin/bash
+
+# NOTE: Need to specify a different tmp directory or it will fill the rhel-root...
+/data/programs/sambamba_v0.6.0 sort -m 8G -t 8 -p --tmpdir=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/data/tmp merged.bam merged.sorted.bam
+
+# Remove PCR duplicates (same as Picard tools)
+
+/data/programs/sambamba_v0.6.0 markdup -t 8 -r --tmpdir=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/data/tmp merged.sorted.bam merged.sorted.rmdup.bam
+
+# Run samtools index (with original samtools, not version 019)
+
+/data/programs/samtools index merged.sorted.rmdup.bam
+
+# Making VCF file with samtools version 1.4 # Removing skip-indels
+/data/programs/samtools-1.4.1/samtools mpileup -u -t DP,AD,INFO/AD -f /data/urchinadult/carbonic_anhydrase_nt.fa merged.sorted.rmdup.bam | /data/programs/bcftools/bin/bcftools bcftools call -mv  > CarbonicAnhydrase_urchinlarvae2013.vcf
+
+#######################################################################################################################
+
+
+
