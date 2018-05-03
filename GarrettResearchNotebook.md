@@ -10,9 +10,9 @@
 
 
 # Table of contents (for 200 entries)    
-* [Page 1:   2018-04-04](#id-section1) Urchin Capseq MS BWA Mem ReMapping Notes
-* [Page 2:  ](#id-section2) Carbonic Anhydrase: Getting Allele Freqs From Files Melissa Mapped
-* [Page 3:  ](#id-section3).
+* [Page 1:   Start: 2018-04-04](#id-section1). Urchin Capseq MS BWA Mem ReMapping Notes
+* [Page 2:  ](#id-section2). Carbonic Anhydrase: Getting Allele Freqs From Files Melissa Mapped
+* [Page 3:   Start: 2018-04-17](#id-section3). Processing OASV2 RNA Samples
 * [Page 4:  ](#id-section4).
 * [Page 5:  ](#id-section5).
 * [Page 6:  ](#id-section6).
@@ -365,7 +365,7 @@ java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
 
 #!/bin/bash
 
-# NOTE: Need to specify a different tmp directory or it will fill the rhel-root...
+(comment out) NOTE: Need to specify a different tmp directory or it will fill the rhel-root...
 /data/programs/sambamba_v0.6.0 sort -m 8G -t 8 -p --tmpdir=/users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/data/tmp merged.bam merged.sorted.bam
 
 # Remove PCR duplicates (same as Picard tools)
@@ -381,5 +381,361 @@ java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
 
 #######################################################################################################################
 
+------
+
+<div id='id-section3'/>  
+
+### Page 3:  Processing OASV2 RNA Samples
+
+### Start: April 17, 2018: OASV2 RNA Samples: FastQC/Trimmomatic
+
+SAMPLES:
+ D107_TAK_S17_L003_R1_001.fastq.gz
+ D722_TAK_S16_L003_R1_001.fastq.gz
+ D722_TruSeq_S18_L003_R1_001.fastq.gz
+ D723_TAK_S15_L003_R1_001.fastq.gz
+
+## LOOKING AT RAW FASTQ FILE QUALITY WITH FASTQC
+
+/data/programs/FastQC/fastqc *.fastq.gz -o ./fastqc/raw
+
+scp *.html amakukho@zoo.uvm.edu:~/public_html
 
 
+## CLEANING READS (April 23, 2018)
+
+#!/bin/bash  
+
+for f1 in *_R1_001.fastq.gz
+
+do
+
+java -jar /data/programs/Trimmomatic-0.36/trimmomatic-0.36.jar SE \
+        -threads 10 \
+        -phred33 \
+         "$f1" \
+         /data/urchinlarvae2018/fastqc/cleaned/"$f1"_left_clean_unpaired.fq \
+        ILLUMINACLIP:/data/urchinlarvae2018/fastqc/OASV2_RNAAdapters.fa:2:30:10 \
+        SLIDINGWINDOW:20:2 \
+        LEADING:2 \
+        TRAILING:2 \
+        MINLEN:35
+
+done
+
+
+## CHECKING NUMBER OF READS BEFORE/AFTER CLEANING (April 24, 2018):
+
+echo $(cat yourfile.fastq|wc -l)/4|bc
+
+# BEFORE:
+D107_TAK_S17_L003_R1_001.fastq.gz -->  43871780
+echo $(zcat D107_TAK_S17_L003_R1_001.fastq.gz|wc -l)/4|bc
+
+D722_TAK_S16_L003_R1_001.fastq.gz  --> 48627152
+echo $(zcat D722_TAK_S16_L003_R1_001.fastq.gz|wc -l)/4|bc
+
+D722_TruSeq_S18_L003_R1_001.fastq.gz --> 59064939
+echo $(zcat D722_TruSeq_S18_L003_R1_001.fastq.gz|wc -l)/4|bc
+
+D723_TAK_S15_L003_R1_001.fastq.gz --> 36001001
+echo $(zcat D723_TAK_S15_L003_R1_001.fastq.gz|wc -l)/4|bc
+
+
+# AFTER:
+D107_TAK_S17_L003_R1_001.fastq.gz_left_clean_unpaired.fq --> 42767363
+echo $(cat D107_TAK_S17_L003_R1_001.fastq.gz_left_clean_unpaired.fq|wc -l)/4|bc
+
+D722_TAK_S16_L003_R1_001.fastq.gz_left_clean_unpaired.fq --> 45155896
+echo $(cat D722_TAK_S16_L003_R1_001.fastq.gz_left_clean_unpaired.fq|wc -l)/4|bc
+
+D722_TruSeq_S18_L003_R1_001.fastq.gz_left_clean_unpaired.fq --> 59060167
+echo $(cat D722_TruSeq_S18_L003_R1_001.fastq.gz_left_clean_unpaired.fq|wc -l)/4|bc
+
+D723_TAK_S15_L003_R1_001.fastq.gz_left_clean_unpaired.fq --> 31817008
+echo $(cat D723_TAK_S15_L003_R1_001.fastq.gz_left_clean_unpaired.fq|wc -l)/4|bc
+
+
+# PERCENT LOSS OF READS:
+D107: 2.5%
+D722_TAK: 7.1%
+D722_TruSeq: 0.008%
+D723: 11.6%
+
+# CHECKING CLEANED READS WITH FASTQC IN /data/urchinlarvae2018/fastqc/cleaned DIRECTORY:
+/data/programs/FastQC/fastqc *.fq
+
+moved fastqc files to new directory: /data/urchinlarvae2018/fastqc/cleaned/fastqc
+
+scp *.html amakukho@zoo.uvm.edu:~/public_html
+
+################################################################################################################################
+
+
+### Start: April 24, 2018: OASV2 RNA Samples: MAPPING WITH BWAMEM
+
+SCREEN ID: 9782.pts-1.pespenilab
+/data/programs/bwa/bwa mem -t 4 -k 5 -R '@RG\tID:OASV2_RNA_D1_8_0_S_07\tSM:OASV2_RNA_D1_8_0_S_07\tPL:Illumina' ~/RESEARCH/OASV2/data/bwa_mapped/ref/ref /data/urchinlarvae2018/fastqc/cleaned/D107_TAK_S17_L003_R1_001.fastq.gz_left_clean_unpaired.fq > OASV2_RNA_D1_8_0_S_07_bwamem.sam
+
+SCREEN ID: 9917.pts-1.pespenilab
+/data/programs/bwa/bwa mem -t 4 -k 5 -R '@RG\tID:OASV2_RNA_D7_7_5_S_22\tSM:OASV2_RNA_D7_7_5_S_22\tPL:Illumina' ~/RESEARCH/OASV2/data/bwa_mapped/ref/ref /data/urchinlarvae2018/fastqc/cleaned/D722_TAK_S16_L003_R1_001.fastq.gz_left_clean_unpaired.fq > OASV2_RNA_D7_7_5_S_22_bwamem.sam
+
+SCREEN ID: 9929.pts-1.pespenilab
+/data/programs/bwa/bwa mem -t 4 -k 5 -R '@RG\tID:OASV2_RNA_D7_7_5_S_22_TruSeq\tSM:OASV2_RNA_D7_7_5_S_22_TruSeq\tPL:Illumina' ~/RESEARCH/OASV2/data/bwa_mapped/ref/ref /data/urchinlarvae2018/fastqc/cleaned/D722_TruSeq_S18_L003_R1_001.fastq.gz_left_clean_unpaired.fq > OASV2_RNA_D7_7_5_S_22_TruSeq_bwamem.sam
+
+SCREEN ID: 9944.pts-1.pespenilab
+/data/programs/bwa/bwa mem -t 4 -k 5 -R '@RG\tID:OASV2_RNA_D7_7_5_S_23\tSM:OASV2_RNA_D7_7_5_S_23\tPL:Illumina' ~/RESEARCH/OASV2/data/bwa_mapped/ref/ref /data/urchinlarvae2018/fastqc/cleaned/D723_TAK_S15_L003_R1_001.fastq.gz_left_clean_unpaired.fq > OASV2_RNA_D7_7_5_S_23_bwamem.sam
+
+## SAM FILES FOUND IN: /data/urchinlarvae2018/mapped
+
+################################################################################################################################
+### Start: April 26, 2018: OASV2 RNA Samples: MAPPING WITH BWAMEM - SAM TO BAM AND SAMTOOLS FLAGSTAT
+
+## CONVERTING SAM FILES TO BAM
+
+# Making script called Bam2Sam.sh and putting in /data/urchinlarvae2018/scripts
+
+#!/bin/bash
+
+cd /data/urchinlarvae2018/mapped
+
+for file in *.sam
+
+do
+
+/data/programs/samtools view -@ 16 -bhS "$file" >"$file.bam"
+
+done
+
+# Run chmod +x to make executable
+
+## Ran Bam2Sam.sh in screen ID: 6885.pts-0.pespenilab
+
+
+## CHECKING ON BAM FILES WITH SAMTOOLS FLAGSTAT TO GET % READS MAPPED
+# Use /data/programs/samtools flagstat to check after converting sam to bam (before merging and sorting)
+
+-bash-4.2$ /data/programs/samtools flagstat OASV2_RNA_D1_8_0_S_07_bwamem.sam.bam
+44624556 + 0 in total (QC-passed reads + QC-failed reads)
+0 + 0 secondary
+1857193 + 0 supplementary
+0 + 0 duplicates
+39221596 + 0 mapped (87.89%:-nan%)
+0 + 0 paired in sequencing
+0 + 0 read1
+0 + 0 read2
+0 + 0 properly paired (-nan%:-nan%)
+0 + 0 with itself and mate mapped
+0 + 0 singletons (-nan%:-nan%)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
+-bash-4.2$ /data/programs/samtools flagstat OASV2_RNA_D7_7_5_S_22_bwamem.sam.bam
+49420953 + 0 in total (QC-passed reads + QC-failed reads)
+0 + 0 secondary
+4265057 + 0 supplementary
+0 + 0 duplicates
+45575885 + 0 mapped (92.22%:-nan%)
+0 + 0 paired in sequencing
+0 + 0 read1
+0 + 0 read2
+0 + 0 properly paired (-nan%:-nan%)
+0 + 0 with itself and mate mapped
+0 + 0 singletons (-nan%:-nan%)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
+-bash-4.2$ /data/programs/samtools flagstat OASV2_RNA_D7_7_5_S_22_TruSeq_bwamem.sam.bam
+65014018 + 0 in total (QC-passed reads + QC-failed reads)
+0 + 0 secondary
+5953851 + 0 supplementary
+0 + 0 duplicates
+57966089 + 0 mapped (89.16%:-nan%)
+0 + 0 paired in sequencing
+0 + 0 read1
+0 + 0 read2
+0 + 0 properly paired (-nan%:-nan%)
+0 + 0 with itself and mate mapped
+0 + 0 singletons (-nan%:-nan%)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
+-bash-4.2$ /data/programs/samtools flagstat OASV2_RNA_D7_7_5_S_23_bwamem.sam.bam
+35058644 + 0 in total (QC-passed reads + QC-failed reads)
+0 + 0 secondary
+3241636 + 0 supplementary
+0 + 0 duplicates
+32550729 + 0 mapped (92.85%:-nan%)
+0 + 0 paired in sequencing
+0 + 0 read1
+0 + 0 read2
+0 + 0 properly paired (-nan%:-nan%)
+0 + 0 with itself and mate mapped
+0 + 0 singletons (-nan%:-nan%)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
+################################################################################################################################
+### Start: April 26, 2018: OASV2 RNA Samples: MERGING, SORTING, REMOVING DUPLICATES, AND INDEXING
+
+# MERGING
+# Merge all the bam files into one : Screen ID: 27053.pts-0.pespenilab
+/data/programs/samtools merge merged.bam *.bam 
+
+# SORTING
+# NOTE: Need to specify a different tmp directory or it will fill the rhel-root... (CURRENTLY HERE)
+/data/programs/sambamba_v0.6.0 sort -m 8G -t 8 -p --tmpdir=/data/urchinlarvae2018/mapped/tmp merged.bam merged.sorted.bam
+SCREEN ID: 56281.pts-5.pespenilab
+
+
+# REMOVING PCR DUPLICATES
+# Remove PCR duplicates (same as Picard tools) # run in my directory /users/a/m/amakukho/RESEARCH/CarbonicAnhydrase/data
+/data/programs/sambamba_v0.6.0 markdup -t 8 -r --tmpdir=/data/urchinlarvae2018/mapped/tmp merged.sorted.bam merged.sorted.rmdup.bam
+
+
+
+
+################################################################################################################################
+### Start: April 30, 2018: OASV2 RNA Samples: MERGING, SORTING, REMOVING DUPLICATES (PICARD TOOLS), AND INDEXING
+
+## Keep getting the following error: "More than 16383 reference sequences are unsupported sambamba-markdup". Going to try using Picard Tools to mark duplicates. 
+
+
+EXAMPLE:
+ java ­jar MarkDuplicates.jar INPUT=$bamfile
+       OUTPUT=$bamfile_dupFree.bam  REMOVE_DUPLICATES=true
+       METRICS_FILE=metrics CREATE_INDEX=true
+       VALIDATION_STRINGENCY=LENIENT
+
+
+## NOTE: LB needs to be part of read group in order for read group to be considered in Picard Tools Mark Duplicates (http://seqanswers.com/forums/showthread.php?t=19540) (https://software.broadinstitute.org/gatk/documentation/article.php?id=6472), so need to replace the read groups via Picard Tools first:
+
+
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=OASV2_RNA_D1_8_0_S_07_bwamem.sam.bam \
+      O=OASV2_RNA_D1_8_0_S_07_bwamem.WithLB.bam \
+      RGID=OASV2_RNA_D1_8_0_S_07 \
+      RGLB=OASV2_RNA_D1_8_0_S_07 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=OASV2_RNA_D1_8_0_S_07     
+# SCREEN ID: 8818.pts-13.pespenilab
+      
+      
+       AddOrReplaceReadGroups \
+      I=OASV2_RNA_D7_7_5_S_22_bwamem.sam.bam \
+      O=OASV2_RNA_D7_7_5_S_22_bwamem.WithLB.bam \
+      RGID=OASV2_RNA_D7_7_5_S_22 \
+      RGLB=OASV2_RNA_D7_7_5_S_22 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=OASV2_RNA_D7_7_5_S_22
+# SCREEN ID: 9346.pts-13.pespenilab
+
+
+
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=OASV2_RNA_D7_7_5_S_22_TruSeq_bwamem.sam.bam \
+      O=OASV2_RNA_D7_7_5_S_22_TruSeq_bwamem.WithLB.bam \
+      RGID=OASV2_RNA_D7_7_5_S_22_TruSeq \
+      RGLB=OASV2_RNA_D7_7_5_S_22_TruSeq \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=OASV2_RNA_D7_7_5_S_22_TruSeq   
+# SCREEN ID: 9513.pts-13.pespenilab
+
+      
+java -jar /data/programs/picard.jar AddOrReplaceReadGroups \
+      I=OASV2_RNA_D7_7_5_S_23_bwamem.sam.bam \
+      O=OASV2_RNA_D7_7_5_S_23_bwamem.WithLB.bam \
+      RGID=OASV2_RNA_D7_7_5_S_23 \
+      RGLB=OASV2_RNA_D7_7_5_S_23 \
+      RGPL=Illumina \
+      RGPU=NA \
+      RGSM=OASV2_RNA_D7_7_5_S_23         
+# SCREEN ID: 9878.pts-13.pespenilab       
+      
+      
+      
+# MERGING
+# Merge all the bam files into one : Screen ID: 15137.pts-13.pespenilab
+/data/programs/samtools merge merged.bam *.bam 
+
+# SORTING
+# NOTE: Need to specify a different tmp directory or it will fill the rhel-root... (CURRENTLY HERE)
+/data/programs/sambamba_v0.6.0 sort -m 8G -t 8 -p --tmpdir=/data/urchinlarvae2018/mapped/tmp merged.bam merged.sorted.bam
+SCREEN ID: 24762.pts-0.pespenilab
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+## IGNORE: REMOVING PCR DUPLICATES (PICARD TOOLS INSTEAD OF SAMBAMBA) ##
+  
+  java ­jar MarkDuplicates.jar INPUT=merged.sorted.bam
+       OUTPUT=merged.sorted_dupFree.bam
+       METRICS_FILE=metrics.txt CREATE_INDEX=true
+       VALIDATION_STRINGENCY=LENIENT  
+         
+java -jar picard.jar BuildBamIndex \ 
+    INPUT=dedup_reads.bam   
+
+### HOLDING OFF ON THIS, UNCLEAR IF MARKED DUPLICATES WILL BE PICKED UP BY SAMTOOLS MPILEUP. GOING TO USE SAMTOOLS RMDUP INSTEAD: Ebert et al., 2016: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4965708/
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+# REMOVING PCR DUPLICATES WITH samtools rmdup
+Usage:  samtools rmdup [-sS] <input.srt.bam> <output.bam>
+
+/data/programs/samtools rmdup -s merged.sorted.bam merged.sorted.rmdup.bam
+
+# GOT AN ERROR, ISN'T WORKING. GOING TO TRY PICARD TOOLS SINCE THERE IS AN OPTION TO NOT JUST MARK DUPLICATES BUT TO REMOVE THEM (didn't realize this before)   
+
+
+# REMOVING DUPLICATES WITH PICARD TOOLS
+java ­jar /data/programs/picard.jar MarkDuplicates INPUT=merged.sorted.bam \
+       OUTPUT=merged.sorted.rmdup.bam  REMOVE_DUPLICATES=true \
+       METRICS_FILE=PCRdups.txt CREATE_INDEX=true \
+       VALIDATION_STRINGENCY=SILENT 
+       
+       
+       
+  java ­jar /data/programs/picard.jar MarkDuplicates \
+		I=merged.sorted.bam \
+		O=merged.sorted.rmdup.bam \
+		M=PCRdups.txt \
+		REMOVE_DUPLICATES=true
+         
+  java -jar picard.jar BuildBamIndex \ 
+       INPUT=dedup_reads.bam  
+
+
+
+# COMMAND THAT WORKED FOR REMOVING DUPLICATES
+java -jar /data/programs/picard.jar MarkDuplicates I=merged.sorted.bam O=merged.sorted.rmdup.bam M=PCRdups.txt REMOVE_DUPLICATES=TRUE
+
+SCREEN ID: 62046.pts-24.pespenilab
+
+
+NOTE: AFTER REMOVING DUPLICATES, BAM FILE SIZE WENT FROM 9769165024 to 3299599512 (66% loss of data)
+
+### Going to make VCF from merged.sorted.bam and merged.sorted.rmdup.bam files ###
+      
+      
+# INDEXING
+# Run samtools index (with original samtools, not version 019)
+/data/programs/samtools index merged.sorted.rmdup.bam 
+SCREEN ID: 5907.pts-0.pespenilab
+
+
+### VCF
+# Making VCF file with samtools version 1.4 # Removing skip-indels
+
+# WITHOUT DUPLICATES
+/data/programs/samtools-1.4.1/samtools mpileup -u -t DP,AD,INFO/AD -f /users/a/m/amakukho/RESEARCH/OASV2/Spur_3.1.LinearScaffold.fa merged.sorted.rmdup.bam | /data/programs/bcftools/bin/bcftools call -mv  > RNA_OASV2_urchinlarvae2018_NoDups.vcf
+
+SCREEN ID: 7282.pts-0.pespenilab
+
+# WITH DUPLICATES
+/data/programs/samtools-1.4.1/samtools mpileup -u -t DP,AD,INFO/AD -f /users/a/m/amakukho/RESEARCH/OASV2/Spur_3.1.LinearScaffold.fa merged.sorted.bam | 
+/data/programs/bcftools/bin/bcftools call -mv  > RNA_OASV2_urchinlarvae2018.vcf 
+
+SCREEN ID: 7300.pts-0.pespenilab
